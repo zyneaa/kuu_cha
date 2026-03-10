@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UCSM</title>
+  </head>
+  <body style="background-color: white; color: black;">
+    <script>
+      function copy() {
+        const code = document.getElementById("code-block").innerText
+        const temp_text_are = document.createElement("textarea")
+        temp_text_are.value = code
+        document.body.appendChild(temp_text_are)
+        temp_text_are.select()
+        document.execCommand("copy")
+        document.body.removeChild(temp_text_are)
+        alert("Code copied to clipboard!")
+      }
+    </script>
+    <h1>{{ folder }}/{{ file_name }}</h1>
+    <button onclick="copy()">Copy</button>
+    <a href="/{{ folder }}">Back</a>
+    <hr>
+    <div id="code-block">
+      {{ content|safe }}
+    </div>
+  </body>
+</html>

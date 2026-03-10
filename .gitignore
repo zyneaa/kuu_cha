@@ -1,0 +1,24 @@
+# --- Python / FastAPI ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv
+venv/
+ENV/
+.env
+
+# --- OS Specific ---
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# --- Project Specific (The Stash) ---
+# We ignore the files folder so you don't push the zips to git
+files/
+*.zip
+*.tmp
+
+# --- Nginx / Logs ---
+logs/
+*.log

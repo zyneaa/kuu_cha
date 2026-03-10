@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UCSM</title>
+  <body>
+    <h3>Upload Files</h3>
+    <form action="/u" method="post" enctype="multipart/form-data">
+      Folder Name: <input type="text" name="folder" required><br><br>
+      Files: <input type="file" name="files" multiple required><br><br>
+      <input type="submit" value="Upload">
+    </form>
+    <h3>Folders</h3>
+    <ul>
+    {% for folder_name in folder %}
+      <li>
+        <a href="/{{ folder_name }}">{{ folder_name }}</a>
+        [ <a href="/d/{{ folder_name }}">Download Zip</a> ]
+      </li>
+    {% endfor %}
+    </ul>
+    <button onclick="window.location.href='/download'">Download Global Backup (files.zip)</button>
+  </body>
+  </head>
+</html>
