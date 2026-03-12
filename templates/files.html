@@ -1,32 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UCSM</title>
-  <body>
-    <h1>Folder: {{ folder }}</h1>
-    <a href="/">Back to Explorer</a>
-    <hr>
-    <h3>Upload to this folder</h3>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <input type="hidden" name="folder" value="{{ folder }}">
-      File: <input type="file" name="files" multiple required>
-      <input type="submit" value="Upload Files">
-    </form>
-    <hr>
-    <h3>Files</h3>
-    <ul>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UCSM</title>
+
+<body>
+  <h1>Folder: {{ folder }}</h1>
+  <a href="/">Back to Explorer</a>
+  <hr>
+  <h3>Upload to this folder</h3>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="folder" value="{{ folder }}">
+    File: <input type="file" name="files" multiple required>
+    <input type="submit" value="Upload Files">
+  </form>
+  <hr>
+  <h3>Files</h3>
+  <ul>
     {% for file_name in files %}
-      {% if not file_name.endswith('.zip') and file_name != '.DS_Store' %}
-      <li>
-        <a href="/content/{{ folder }}/{{ file_name }}">{{ file_name }}</a>
-      </li>
-      {% endif %}
+    {% if not file_name.endswith('.zip') and file_name != '.DS_Store' %}
+    <li id="file-{{ loop.index }}">
+      <a href="/content/{{ folder }}/{{ file_name }}">{{ file_name }}</a>
+      [ <a href="#" onclick="deleteFile('{{ folder }}', '{{ file_name }}', 'file-{{ loop.index }}'); return false;" style="color: red;">Delete</a> ]
+    </li>
+    {% endif %}
     {% endfor %}
-    </ul>
-    <hr>
-    <a href="/download/{{ folder }}">Download {{ folder }}.zip</a>
-  </body>
-  </head>
+  </ul>
+  <hr>
+  <a href="/download/{{ folder }}.zip">Download {{ folder }}.zip</a>
+
+  <script>
+    async function deleteFile(folder, fileName, elementId) {
+      if (confirm(`Are you sure you want to delete file "${fileName}"?`)) {
+        const response = await fetch(`/delete/${folder}/${fileName}`, { method: 'DELETE' });
+        if (response.ok) {
+          document.getElementById(elementId).remove();
+          alert(`File "${fileName}" deleted.`);
+        } else {
+          alert('Failed to delete file.');
+        }
+      }
+    }
+  </script>
+</body>
+</head>
+
 </html>

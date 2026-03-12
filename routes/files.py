@@ -1,4 +1,5 @@
 import os
+import shutil
 import markdown
 from typing import List
 from fastapi import APIRouter, Request, HTTPException, File, UploadFile, Form
@@ -77,4 +78,35 @@ async def get_content(request: Request, folder: str, file_name: str):
     except Exception as e:
         print(f"Error reading file: {e}")
         return HTMLResponse(content="Internal server error", status_code=500)
+
+@router.delete("/delete/{folder}")
+async def delete_folder(folder: str):
+    folder_path = f"./files/{folder}"
+    zip_path = f"./files/{folder}.zip"
+    
+    if not os.path.exists(folder_path):
+        raise HTTPException(status_code=404, detail="Folder not found")
+        
+    try:
+        shutil.rmtree(folder_path)
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+        return {"message": f"Folder {folder} deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/delete/{folder}/{file_name}")
+async def delete_file(folder: str, file_name: str):
+    file_path = f"./files/{folder}/{file_name}"
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+        
+    try:
+        os.remove(file_path)
+        # Re-zip the folder
+        zip_folder(os.path.abspath(f"./files/{folder}"), folder)
+        return {"message": f"File {file_name} deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
