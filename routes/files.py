@@ -2,7 +2,7 @@ import os
 import shutil
 import markdown
 from typing import List
-from fastapi import APIRouter, Request, HTTPException, File, UploadFile, Form
+from fastapi import APIRouter, Request, HTTPException, File, UploadFile, Form, BackgroundTasks
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from utils.zipper import zip_folder
@@ -27,20 +27,25 @@ async def download_folder(folder_name: str):
     return FileResponse(file_path, filename=f"{folder_name}.zip")
 
 @router.post("/u")
-async def upload_files(_: Request, folder: str = Form(...), files: List[UploadFile] = File(...)):
+async def upload_files(
+    background_tasks: BackgroundTasks, 
+    folder: str = Form(...), 
+    files: List[UploadFile] = File(...)
+):
     folder_path = f"./files/{folder}"
     os.makedirs(folder_path, exist_ok=True)
 
     for file in files:
         file_path = os.path.join(folder_path, file.filename)
-        with open(file_path, "wb") as f:
-            f.write(await file.read())
+        # Using shutil.copyfileobj to stream from the UploadFile to the destination file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
 
-    # Re-zip the folder
-    zip_folder(os.path.abspath(folder_path), folder)
+    # Re-zip the folder in the background to avoid blocking the response
+    background_tasks.add_task(zip_folder, os.path.abspath(folder_path), folder)
 
     # Redirect back or return success
-    return HTMLResponse(content=f"<script>alert('Files uploaded to {folder}'); window.location.href='/';</script>")
+    return HTMLResponse(content=f"<script>alert('Files uploaded to {folder}. Zipping in background...'); window.location.href='/';</script>")
 
 @router.get("/d")
 async def download_all():
